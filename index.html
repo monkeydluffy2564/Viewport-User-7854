@@ -191,6 +191,7 @@
                             </button>
                             <button onclick="app.handleSetTargetLocation()" class="bg-white border border-indigo-200 text-indigo-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-50">ตั้งพิกัด</button>
 							<button onclick="app.openQRScanner()" class="bg-indigo-600 border border-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-700 flex items-center gap-1 shadow-sm"><i data-lucide="scan" class="w-3 h-3"></i> สแกนรับเด็ก</button>
+							<button onclick="app.openBulkCheckInModal()" class="bg-blue-600 border border-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 flex items-center gap-1 shadow-sm"><i data-lucide="users" class="w-3 h-3"></i> เช็กชื่อพร้อมกัน</button>
                         </div>
                     </div>
                     
@@ -285,6 +286,7 @@
                     <button onclick="app.switchAdminTab('rank')" id="tab-btn-rank" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-colors">อันดับวันนี้</button>
                     <button onclick="app.switchAdminTab('average')" id="tab-btn-average" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-colors">สถิติเวลาเฉลี่ย</button>
 					<button onclick="app.switchAdminTab('worst')" id="tab-btn-worst" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-red-500 hover:text-red-700 border-b-2 border-transparent transition-colors">เฝ้าระวัง (สาย/ขาด)</button>
+					<button onclick="app.switchAdminTab('today-late')" id="tab-btn-today-late" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-orange-600 border-b-2 border-transparent transition-colors">ขาด/ลา/สาย วันนี้</button>
                 </div>
 
                 <div class="p-0 relative">
@@ -303,6 +305,10 @@
                         <div id="worst-podium-container" class="flex flex-wrap justify-center items-end gap-x-2 sm:gap-x-4 gap-y-12 pt-16 w-full mx-auto"></div>
                         <div id="worst-others-container" class="mt-8 space-y-2 px-2"></div>
                     </div>
+					<div id="today-late-list" class="hidden max-h-[500px] overflow-y-auto bg-orange-50/30 p-4 pb-8">
+    <div id="late-podium-container" class="flex flex-wrap justify-center items-end gap-x-2 sm:gap-x-4 gap-y-12 pt-16 w-full mx-auto"></div>
+    <div id="late-others-container" class="mt-8 space-y-2 px-2"></div>
+</div>
                 </div>
             </div>
 
@@ -479,6 +485,7 @@
                 <button onclick="app.handleSaveStatus('sick_leave')" class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-sm font-bold hover:bg-blue-200">🤒 ลาป่วย</button>
                 <button onclick="app.handleSaveStatus('personal_leave')" class="w-full bg-purple-100 text-purple-700 py-2 rounded-lg text-sm font-bold hover:bg-purple-200">💼 ลากิจ</button>
                 <button onclick="app.handleSaveStatus('other')" class="w-full bg-slate-200 text-slate-700 py-2 rounded-lg text-sm font-bold hover:bg-slate-300">➖ อื่นๆ (-)</button>
+				<button onclick="app.handleHalfDayLeave()" class="w-full bg-emerald-100 text-emerald-700 py-2 rounded-lg text-sm font-bold hover:bg-emerald-200 shadow-sm border border-emerald-200 mt-2">🌤️ ลาเช้า - มาบ่าย</button>
                 <button onclick="app.handleSaveStatus(null)" class="w-full bg-slate-100 text-slate-700 py-2 rounded-lg text-sm font-bold hover:bg-slate-200">❌ ยกเลิก (คำนวณปกติ)</button>
             </div>
             <button onclick="document.getElementById('modal-status-edit').classList.add('hidden')" class="mt-4 text-slate-400 text-xs hover:text-slate-600">ปิดหน้าต่าง</button>
@@ -606,6 +613,7 @@
                     <button onclick="app.switchUserTab('rank')" id="user-tab-btn-rank" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-colors">อันดับวันนี้</button>
                     <button onclick="app.switchUserTab('average')" id="user-tab-btn-average" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-colors">สถิติเวลาเฉลี่ย</button>
 					<button onclick="app.switchUserTab('worst')" id="user-tab-btn-worst" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-colors">เฝ้าระวัง (สาย/ขาด)</button>
+					<button onclick="app.switchUserTab('today-late')" id="user-tab-btn-today-late" class="shrink-0 px-4 py-3 text-xs sm:text-sm font-bold text-orange-600 border-b-2 border-transparent transition-colors">ขาด/ลา/สาย วันนี้</button>
                 </div>
                 
                 <div class="p-0 relative">
@@ -628,6 +636,10 @@
                         <div id="user-worst-podium-container" class="flex flex-wrap justify-center items-end gap-x-2 sm:gap-x-4 gap-y-12 pt-16 w-full mx-auto"></div>
                         <div id="user-worst-others-container" class="mt-8 space-y-2 px-2"></div>
                     </div>
+					<div id="user-view-today-late" class="hidden max-h-[500px] overflow-y-auto bg-orange-50/30 p-4 pb-8">
+    <div id="user-late-podium-container" class="flex flex-wrap justify-center items-end gap-x-2 sm:gap-x-4 gap-y-12 pt-16 w-full mx-auto"></div>
+    <div id="user-late-others-container" class="mt-8 space-y-2 px-2"></div>
+</div>
                 </div>
             </div>
 
@@ -691,6 +703,28 @@
             <div class="p-4 bg-white border-t border-slate-100 flex gap-2">
                 <button onclick="app.closeCropModal()" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl font-bold hover:bg-slate-200">ยกเลิก</button>
                 <button onclick="app.saveCroppedImage()" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-bold hover:bg-indigo-700">บันทึกรูป</button>
+            </div>
+        </div>
+    </div>
+	
+	<div id="modal-bulk-checkin" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-blue-600"></i> เช็กชื่อพร้อมกัน (ออนไลน์)</h3>
+                <button onclick="document.getElementById('modal-bulk-checkin').classList.add('hidden')" class="text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="bg-indigo-50 text-indigo-700 text-xs p-3 rounded-lg mb-4 border border-indigo-100">
+                💡 <b>คำแนะนำ:</b> เวลาเช็กชื่อจะถูกตั้งเป็น <b>15 นาทีก่อนเส้นตาย</b> เสมอ และไม่โดนทำโทษ
+            </div>
+            <div class="flex justify-between text-xs font-bold text-slate-500 px-2 mb-2 border-b pb-2">
+                <span>รายชื่อนักเรียน</span>
+                <span class="text-red-500">ขาดประจำ (ตัดสิทธิ์ชั่วคราว)</span>
+            </div>
+            <div id="bulk-checkin-list" class="overflow-y-auto flex-1 space-y-2 pr-2 mb-4">
+                </div>
+            <div class="pt-4 border-t border-slate-100 flex gap-2">
+                <button onclick="document.getElementById('modal-bulk-checkin').classList.add('hidden')" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-lg text-sm font-bold">ยกเลิก</button>
+                <button onclick="app.submitBulkCheckIn()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-md">ยืนยันเช็กชื่อ</button>
             </div>
         </div>
     </div>
